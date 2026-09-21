@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: dss150p-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-dss150p}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me}
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./sql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-dss150p} -d dss150p"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  pipeline:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dss150p-pipeline
+    env_file: .env
+    environment:
+      POSTGRES_HOST: postgres
+    working_dir: /app
+    volumes:
+      - .:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["python", "-m", "src.cli", "validate-env"]
+
+volumes:
+  pgdata:

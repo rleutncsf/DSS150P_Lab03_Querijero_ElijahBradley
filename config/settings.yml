@@ -1,0 +1,18 @@
+pipeline:
+  source_dir: data/source
+  raw_dir: data/raw
+  staging_dir: data/staging
+  curated_dir: data/curated
+  quarantine_dir: data/quarantine
+  benchmark_dir: data/benchmarks
+  partition_dir: data/partitioned
+  audit_timezone: UTC
+storage_benchmark:
+  repeats: 5
+  json_lines: true
+  filter_status: DELIVERED
+  partition_columns: [order_year, order_month]
+quality:
+  allowed_order_statuses: [PENDING, PAID, PACKED, SHIPPED, DELIVERED, CANCELLED]
+  min_quantity: 1
+  max_quantity: 20
