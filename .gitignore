@@ -1,0 +1,29 @@
+# Secrets / local environment
+.env
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.idea/
+.vscode/
+
+# Airflow runtime
+logs/
+
+# Generated pipeline outputs (reproducible from data/source + code)
+data/raw/*
+data/staging/*
+data/curated/*
+data/quarantine/*
+data/benchmarks/*
+data/partitioned/*
+!data/raw/.gitkeep
+!data/staging/.gitkeep
+!data/curated/.gitkeep
+!data/quarantine/.gitkeep
+!data/benchmarks/.gitkeep
+!data/partitioned/.gitkeep
+
+# Evidence you may generate locally (commit the ones you want to submit explicitly)
+evidence/*.tmp
