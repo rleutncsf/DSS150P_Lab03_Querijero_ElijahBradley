@@ -5,13 +5,16 @@ x-airflow-common: &airflow-common
     args:
       AIRFLOW_IMAGE_NAME: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.10.5-python3.11}
   env_file: .env
+  # Linux: set AIRFLOW_UID=$(id -u) in .env so files written to bind mounts stay owned by you.
+  user: "${AIRFLOW_UID:-50000}:0"
   environment: &airflow-env
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
     AIRFLOW__CORE__LOAD_EXAMPLES: "false"
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
-    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER:-dss150p}:${POSTGRES_PASSWORD:-change_me}@postgres/airflow
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER:?set POSTGRES_USER in .env}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@postgres/airflow
     PYTHONPATH: /opt/airflow/project
     POSTGRES_HOST: postgres
+    POSTGRES_PORT: "5432"
   volumes:
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs
@@ -29,7 +32,7 @@ services:
       - -c
       - |
         airflow db migrate &&
-        airflow users create --username admin --password admin --firstname DSS150P --lastname Admin --role Admin --email admin@example.com || true
+        airflow users create --username "$${AIRFLOW_ADMIN_USER:-admin}" --password "$${AIRFLOW_ADMIN_PASSWORD:?set AIRFLOW_ADMIN_PASSWORD in .env}" --firstname DSS150P --lastname Admin --role Admin --email admin@example.com || true
 
   airflow-webserver:
     <<: *airflow-common

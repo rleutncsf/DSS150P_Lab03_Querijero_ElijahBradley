@@ -3,16 +3,16 @@ services:
     image: postgres:16
     container_name: dss150p-postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-dss150p}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me}
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
       POSTGRES_DB: postgres
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./sql/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-dss150p} -d dss150p"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d dss150p"]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -24,7 +24,9 @@ services:
     container_name: dss150p-pipeline
     env_file: .env
     environment:
+      # Inside the compose network the database host is the service name, not localhost.
       POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
     working_dir: /app
     volumes:
       - .:/app
