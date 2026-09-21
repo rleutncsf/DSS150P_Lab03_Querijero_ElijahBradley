@@ -10,6 +10,7 @@ def utc_now_iso() -> str:
 
 
 def new_run_id() -> str:
+    """PIPELINE_RUN_ID (e.g. the Airflow run_id) wins so every task in a DAG run shares one id."""
     return os.getenv('PIPELINE_RUN_ID') or f"run_{datetime.now(timezone.utc):%Y%m%dT%H%M%SZ}_{uuid.uuid4().hex[:8]}"
 
 
