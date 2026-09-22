@@ -1,0 +1,53 @@
+layer,column_name,data_type,nullable,description,source_field,transformation_rule
+staging.customers,customer_id,string,no,Business key,customers.csv:customer_id,trim; quarantine if blank
+staging.customers,first_name,string,yes,First name,first_name,trim/collapse whitespace
+staging.customers,last_name,string,yes,Last name,last_name,trim/collapse whitespace
+staging.customers,email,string,yes,Contact email,email,trim + lowercase; missing stays NULL
+staging.customers,email_missing,bool,no,Visible data-quality flag,derived,email IS NULL
+staging.customers,city,string,yes,City,city,"trim, collapse spaces, title-case"
+staging.customers,customer_tier,string,yes,Loyalty tier,customer_tier,trim
+staging.customers,created_at,timestamptz,yes,Created (UTC),created_at,parse ISO-8601 to UTC
+staging.customers,updated_at,timestamptz,no,Source version timestamp (UTC),updated_at,parse; latest per customer_id wins; quarantine if unparseable
+staging.customers,pipeline_run_id,string,no,Run identifier,pipeline,env PIPELINE_RUN_ID or generated
+staging.customers,staged_at_utc,timestamptz,no,Staging time (UTC),pipeline,now() UTC
+staging.products,product_id,string,no,Business key,products.json:product_id,trim; quarantine if blank
+staging.products,name,string,yes,Product name,name,trim
+staging.products,brand,string,yes,Brand,brand,trim
+staging.products,category_name,string,yes,Flattened category,category.name,flatten nested object
+staging.products,category_department,string,yes,Flattened department,category.department,flatten nested object
+staging.products,unit_price,float64,no,Catalog price,unit_price,numeric; quarantine if non-numeric or < 0
+staging.products,active,bool,yes,Active flag,active,as-is
+staging.products,updated_at,timestamptz,no,Source version timestamp,updated_at,latest per product_id wins
+staging.products,pipeline_run_id,string,no,Run identifier,pipeline,
+staging.products,staged_at_utc,timestamptz,no,Staging time (UTC),pipeline,
+staging.orders,order_id,string,no,Business key,orders.csv:order_id,trim; quarantine if blank
+staging.orders,customer_id,string,no,FK to customers,customer_id,trim
+staging.orders,product_id,string,no,FK to products,product_id,trim
+staging.orders,order_timestamp,timestamptz,no,Order time (UTC),order_timestamp,parse to UTC; quarantine if invalid
+staging.orders,quantity,Int64,no,Units ordered,quantity,integer 1..20 else quarantine
+staging.orders,unit_price,float64,no,Price at order time,unit_price,numeric >= 0
+staging.orders,discount_pct,float64,no,Discount fraction,discount_pct,numeric 0..1
+staging.orders,status,string,no,Order status,status,trim+upper; must be in allowed list
+staging.orders,updated_at,timestamptz,no,Source version timestamp,updated_at,latest per order_id wins
+staging.orders,pipeline_run_id,string,no,Run identifier,pipeline,
+staging.orders,staged_at_utc,timestamptz,no,Staging time (UTC),pipeline,
+curated.sales_order_lines,order_id,TEXT,no,Primary key / UPSERT conflict key,orders.order_id,pass-through
+curated.sales_order_lines,customer_id,TEXT,no,Customer,orders.customer_id,must exist in valid staging customers
+curated.sales_order_lines,product_id,TEXT,no,Product,orders.product_id,must exist in valid staging products
+curated.sales_order_lines,order_timestamp,TIMESTAMPTZ,no,Order time (UTC),orders.order_timestamp,pass-through
+curated.sales_order_lines,customer_city,TEXT,yes,City at load time,customers.city,join
+curated.sales_order_lines,customer_tier,TEXT,yes,Tier at load time,customers.customer_tier,join
+curated.sales_order_lines,product_name,TEXT,yes,Product name,products.name,join
+curated.sales_order_lines,category,TEXT,yes,Product category,products.category_name,join
+curated.sales_order_lines,brand,TEXT,yes,Brand,products.brand,join
+curated.sales_order_lines,quantity,INTEGER,no,Units,orders.quantity,pass-through
+curated.sales_order_lines,unit_price,"NUMERIC(14,2)",no,Price paid per unit,orders.unit_price,"pass-through (transaction price, not catalog price)"
+curated.sales_order_lines,discount_pct,"NUMERIC(6,4)",no,Discount fraction,orders.discount_pct,pass-through
+curated.sales_order_lines,gross_amount,"NUMERIC(16,2)",no,Gross amount,derived,quantity * unit_price (integer cents)
+curated.sales_order_lines,discount_amount,"NUMERIC(16,2)",no,Discount amount,derived,"gross_amount * discount_pct (half-up, cents)"
+curated.sales_order_lines,net_amount,"NUMERIC(16,2)",no,Net amount,derived,gross_amount - discount_amount
+curated.sales_order_lines,status,TEXT,no,Order status,orders.status,pass-through
+curated.sales_order_lines,source_updated_at,TIMESTAMPTZ,no,Order version timestamp,orders.updated_at,audit
+curated.sales_order_lines,pipeline_run_id,TEXT,no,Run that last wrote the row,pipeline,audit (unchanged rows keep the older run id)
+curated.sales_order_lines,processed_at_utc,TIMESTAMPTZ,no,Processing time (UTC),pipeline,audit; excluded from hash
+curated.sales_order_lines,record_hash,TEXT,no,SHA-256 of business content,derived,"16 business columns; excludes run id, processed_at, source_updated_at"
