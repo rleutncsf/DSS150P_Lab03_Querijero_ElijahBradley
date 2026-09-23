@@ -177,7 +177,7 @@ def partition_report(dataset_dir, repeats: int) -> dict:
     parts = []
     for f in sorted(dataset_dir.glob('order_year=*/order_month=*/*.parquet')):
         md = pq.ParquetFile(f).metadata
-        parts.append({'partition': str(f.parent.relative_to(dataset_dir)), 'file': f.name,
+        parts.append({'partition': f.parent.relative_to(dataset_dir).as_posix(), 'file': f.name,
                       'rows': md.num_rows, 'bytes': f.stat().st_size})
     last = parts[-1]['partition'] if parts else None
     report = {'partitions': parts, 'partition_count': len(parts),

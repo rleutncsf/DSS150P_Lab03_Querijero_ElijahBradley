@@ -1,7 +1,7 @@
 storage_type,file_size_bytes,write_seconds,full_read_seconds,filtered_read_seconds,row_count,notes,filtered_row_count,repeats
-csv,14947641,1.511310500005493,0.4815085000009276,0.4699502999865217,49897,"text, untyped: types/timestamps re-parsed on every read; no predicate push-down",8355,5
-jsonl,30690036,2.2008977999939816,0.9010111999959918,0.8374229000037303,49897,one JSON object per line; column names repeated in every row,8355,5
-parquet_snappy,5402660,0.08536700000695419,0.022108100005425513,0.027545199991436675,49897,"columnar, typed, snappy; filter pushed down to row groups",8355,5
-parquet_zstd,3451769,0.09820989999570884,0.02518560001044534,0.030549500006600283,49897,"columnar, typed, zstd (higher ratio, more CPU)",8355,5
-postgresql,14688256,0.9595846000011079,0.8655405000026803,0.14391640000394545,49897,server table; size = pg_total_relation_size (table 14688256 B + indexes 0 B); write = create+COPY+ANALYZE; read includes client fetch into DataFrame,8355,5
-postgresql_indexed_status,15089664,0.9261359000083758,0.7617862000042805,0.12220399999932852,49897,server table; size = pg_total_relation_size (table 14721024 B + indexes 368640 B); write = create+COPY+index+ANALYZE; read includes client fetch into DataFrame,8355,5
+csv,14947641,1.5034347000037087,0.4421879000001354,0.4265270000032615,49897,"text, untyped: types/timestamps re-parsed on every read; no predicate push-down",8355,5
+jsonl,30690036,1.794042299996363,0.8470211000094423,0.8635205000027781,49897,one JSON object per line; column names repeated in every row,8355,5
+parquet_snappy,5402660,0.07560260000173002,0.020267200001399033,0.026475099992239848,49897,"columnar, typed, snappy; filter pushed down to row groups",8355,5
+parquet_zstd,3451769,0.09542660000442993,0.020170100004179403,0.026048500003525987,49897,"columnar, typed, zstd (higher ratio, more CPU)",8355,5
+postgresql,14688256,0.9687097999994876,0.8479917000076966,0.16854630000307225,49897,server table; size = pg_total_relation_size (table 14688256 B + indexes 0 B); write = create+COPY+ANALYZE; read includes client fetch into DataFrame,8355,5
+postgresql_indexed_status,15056896,0.9743011999962619,0.894254999991972,0.15204889999586158,49897,server table; size = pg_total_relation_size (table 14688256 B + indexes 368640 B); write = create+COPY+index+ANALYZE; read includes client fetch into DataFrame,8355,5
