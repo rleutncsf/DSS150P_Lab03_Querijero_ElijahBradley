@@ -1,0 +1,11 @@
+{
+  "platform": "Windows-11-10.0.26200-SP0",
+  "processor": "Intel64 Family 6 Model 142 Stepping 12, GenuineIntel",
+  "cpu_count": 8,
+  "ram_gb": null,
+  "python": "3.12.0",
+  "pandas": "3.0.6",
+  "pyarrow": "17.0.0",
+  "running_in_docker": false,
+  "note": "Add disk type (SSD/HDD), power mode and background load manually to your report."
+}
